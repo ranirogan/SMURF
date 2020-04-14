@@ -9,8 +9,12 @@ export default class Interpreter{
         let left = node.left.accept(this)
         let right = node.right.accept(this)
         switch(node.op){ 
+            case "-":
+                return left - right
             case "+":
                 return left + right
+            case "/":
+                return left / right 
             case "*":
                 return left * right
         }
