@@ -3,7 +3,7 @@
 }
 
 arithmetic_expression
-	= left:mult_term op:addop right:mult_term
+	= left:mult_term (op:addop right:mult_term)+
   {return new AST.BinOP(left, op, right)}
   / mult_term
 
