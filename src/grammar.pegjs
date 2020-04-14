@@ -19,12 +19,15 @@ primary
   // / variable_value                 // two out for now
 
 integer
-	= ('+' / '-')? digits
+	= '+' term:digits
+    {return new AST.Integer(parseInt(term))}
+  / '-' term:digits
+    {return new AST.Integer(parseInt(term)*-1)}
+  / term:digits
+    {return new AST.Integer(parseInt(term))}
 
 digits
 	= term:[0-9]+
-  {return new AST.Integer(parseInt(term.join(""), 10))
-  }
 
 addop
 	= '+' 

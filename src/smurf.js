@@ -1,7 +1,7 @@
  ////////////////////////////////////////////////////////
  //              DO NOT CHANGE THIS FILE               //
  ////////////////////////////////////////////////////////
-
+ 
 import fs from "fs"
 import loadGrammar from "./util/load_grammar.js"
 import compileAndRun from "./compiler.js"

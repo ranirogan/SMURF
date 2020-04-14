@@ -6,9 +6,9 @@ export default class Interpreter{
 
     visitBinOp(node){
         console.log("test", node)
-        let left = node.left[1].accept(this)
-        let right = node.right[1].accept(this)
-        switch(node.op){
+        let left = node.left.accept(this)
+        let right = node.right.accept(this)
+        switch(node.op){ 
             case "+":
                 return left + right
             case "*":

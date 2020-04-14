@@ -7,7 +7,7 @@ export class BinOP{
     }
     accept(visitor){
         return visitor.visitBinOp(this)
-    }
+    } 
 }
 
 export class Integer{
