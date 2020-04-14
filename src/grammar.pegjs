@@ -3,28 +3,29 @@
 }
 
 arithmetic_expression
-	= left:mult_term (op:addop right:mult_term)+
-  {return new AST.BinOP(left, op, right)}
-  / mult_term
+	= _ head:mult_term _ rest:(addop mult_term)* _
+  {return rest.reduce((result, [op, right])=>new AST.BinOp(result, op, right), head)
+  }
 
 mult_term
-	= left:primary op:mulop right:primary
-  {return new AST.BinOP(left, op, right)}
-  / primary
+	= _ head:primary _ rest:(mulop primary)* _
+    {return rest.reduce((result, [op,right])=>new AST.BinOp(result, op, right), head)
+      }
 
 primary
-	= "(" arithmetic_expression ")"
+	= _ "(" _ exp:arithmetic_expression _ ")" _
+    {return exp}
     / integer
   // / function_call                  // I”ve commented these
   // / variable_value                 // two out for now
 
 integer
-	= '+' term:digits
-    {return new AST.Integer(parseInt(term))}
-  / '-' term:digits
-    {return new AST.Integer(parseInt(term)*-1)}
-  / term:digits
-    {return new AST.Integer(parseInt(term))}
+	= _ '+' _ term:digits _
+    {return new AST.Integer(parseInt(term.join(""), 10))}
+  / _ '-' _ term:digits _
+    {return new AST.Integer(parseInt(term.join(""), 10)*-1)}
+  / _ term:digits _
+    {return new AST.Integer(parseInt(term.join(""), 10))}
 
 digits
 	= term:[0-9]+

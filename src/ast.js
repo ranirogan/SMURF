@@ -1,4 +1,4 @@
-export class BinOP{
+export class BinOp{
     constructor(l, op, r){
         this.left = l
         this.op = op
