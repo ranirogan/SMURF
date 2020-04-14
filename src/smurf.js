@@ -20,6 +20,9 @@ function printFunction(arg) {
 let grammar = loadGrammar()
 
 let script = process.argv[2]
+
+console.log("argv[2] is", process.argv[2])
+
 if (script.endsWith(".smu")) {
   script = fs.readFileSync(script, "utf-8")
 }
