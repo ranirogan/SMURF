@@ -39,16 +39,68 @@ export class VariableName{
     }
 }
 
+export class VariableValue{
+    constructor(value){
+        this.value = value
+    }
+
+    accept(visitor){
+        return visitor.VariableValue(this)
+    }
+}
+
 export class IfStatement{
     constructor(predicate, thenCode, elseCode){
         this.predicate = predicate
         this.thenCode = thenCode
         this.elseCode = elseCode
-        console.log("IF CTR", this)
     }
 
     accept(visitor){
-        console.log("IF ACCEPT PT 1", this.predicate, this.thenCode)
         return visitor.IfStatement(this)
+    }
+}
+
+export class StatementList{
+    constructor(statements){
+        this.statements = statements
+    }
+
+    accept(visitor){
+        return visitor.StatementList(this)
+    }
+}
+
+export class BoundFunction{
+    constructor(formals, code, binding){
+        this.formals = formals
+        this.code = code
+        this.binding = binding
+    }
+
+    accept(visitor){
+        return visitor.BoundFunction(this)
+    }
+}
+
+export class FunctionCall{
+    constructor(name, args){
+        this.name = name
+        this.args = args
+    }
+
+    accept(visitor){
+        return visitor.FunctionCall(this)
+    }
+}
+
+export class FunctionDefinition{
+    constructor(formals, code){
+        this.formals = formals
+        this.code = code
+    }
+
+    accept(visitor){
+        return visitor.FunctionDefinition(this)
     }
 }

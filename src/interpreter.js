@@ -1,4 +1,8 @@
 export default class Interpreter{
+    constructor(target, printFunction){
+        this.binding = new Map()
+    }
+
     visit(node){
         return node.accept(this)
     }
@@ -12,7 +16,7 @@ export default class Interpreter{
             case "+":
                 return left + right
             case "/":
-                return left / right 
+                return Math.round(left / right) 
             case "*":
                 return left * right
             case "==":
@@ -35,10 +39,6 @@ export default class Interpreter{
         return node.value
     }
 
-    constructor(target, printFunction){
-        this.binding = new Map()
-    }
-
     Assignment(node){
         let variable = node.variable.accept(this)
         let expr = node.expr.accept(this)
@@ -50,17 +50,46 @@ export default class Interpreter{
         return node.name
     }
 
+    VariableValue(node){
+        return this.getValue(node.value)
+    }
+
+    getValue(name){
+        let temp = this.binding.get(name)
+        if(temp == undefined)
+            return 0
+        else
+            return this.binding.get(name)
+    }
+
     setVariable(name, value){
         this.binding.set(name, value)
+        console.log(this)
     }
 
     IfStatement(node){
-        console.log("IF ACCEPT PT 2", node.predicate, node.thenCode)
         let isTrue = node.predicate.accept(this)
         if(isTrue)
             return node.thenCode.accept(this)
         else
             return node.elseCode.accept(this)
+    }
+
+    StatementList(node){
+        let statements = node.statements
+        var toReturn
+        for(let i = 0; i < statements.length; i++)
+            toReturn = node.statements[i].accept(this)
+        return toReturn
+    }
+
+    FunctionDefinition(node){
+        return node.code
+    }
+
+    FunctionCall(node){
+        let bodyAST = node.name.accept(this)
+        return bodyAST.accept(this)
     }
 }
 
