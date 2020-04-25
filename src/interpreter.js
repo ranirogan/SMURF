@@ -10,13 +10,13 @@ export default class Interpreter{
     visitBinOp(node){
         let left = node.left.accept(this)
         let right = node.right.accept(this)
-        switch(node.op){ 
+        switch(node.op){
             case "-":
                 return left - right
             case "+":
                 return left + right
             case "/":
-                return Math.round(left / right) 
+                return Math.round(left / right)
             case "*":
                 return left * right
             case "==":
@@ -64,7 +64,6 @@ export default class Interpreter{
 
     setVariable(name, value){
         this.binding.set(name, value)
-        console.log(this)
     }
 
     IfStatement(node){
@@ -92,4 +91,3 @@ export default class Interpreter{
         return bodyAST.accept(this)
     }
 }
-
