@@ -1,120 +1,167 @@
 {
   const AST = options.AST
+
+  function rollupBinOp(head, rest) {
+    return rest.reduce(
+      (result, [op, right]) => new AST.BinOp(result, op, right),
+      head
+    )
+  }
 }
+
 start
   = code
-identifier
-  = [a-z]([a-z][A-Z][0-9]_)*
-//////////////////////////////////////////////blocks///////////////////////////////////////////////
+
+///////////////////////// blocks (lists of staements) /////////////////////////
+
 code
-  = term:(statement)+
-  {return new AST.StatementList(term)}
+  = stmts:statementWithOptionalLeadingSpaces* _
+    { return new AST.StatementList(stmts) }
+
+statementWithOptionalLeadingSpaces
+  = _ s:statement { return s }
 
 statement
-  = "let" _ term:variable_declaration
-  {return term}
-  / term:assignment
-  {return term}
-  / term:expr
-  {return term}
+  = "let" __ decl:variable_declaration
+    { return decl }
+  / assignment
+  / expr
 
-///////////////////////////////////////variables///////////////////////////////////////////////////
+//////////////////////////////// variables & variable declaration /////////////////////////////
+
 variable_declaration
-  = _ left:variable_name _ "=" _ right:expr
-  {return new AST.Assignment(left, right)}
-  / term:variable_name
-    {return new AST.Assignment(term, new AST.Integer(0))}
+  = name:variable_name _ "=" _ expr:expr
+    { return new AST.VariableDeclaration(name, expr) }
+  / name:variable_name
+    { return new AST.VariableDeclaration(name, null) }
 
-variable_value
-  = id:identifier
-  {return new AST.VariableValue(id.join(""))}
+variable_value                // as rvalue
+  =  id:identifier
+     { return new AST.VariableValue(id) }
 
-variable_name
-  = id:identifier
-  {return new AST.VariableName(id.join(""))}
+variable_name                 // as lvalue
+  =  id:identifier
+     { return new AST.VariableName(id) }
 
-///////////////////////////////////////////////if//////////////////////////////////////////////////
+
+//////////////////////////////// if/then/else /////////////////////////////
+
 if_expression
-  = _ predicate:expr _ thenCode:brace_block _ "else" _ elseCode:brace_block _
-  {return new AST.IfStatement(predicate, thenCode, elseCode)}
-  / predicate:expr _ elseCode:brace_block
-  {return new AST.IfStatement(predicate, elseCode, "")}
+  = expr:expr _ thenCode:brace_block _ "else" _ elseCode:brace_block
+    {
+      return new AST.IfStatement(expr, thenCode, elseCode)
+    }
+  /  expr:expr _ thenCode:brace_block
+    {
+      return new AST.IfStatement(expr,
+                                 thenCode,
+                                 new AST.IntegerValue(0))
+    }
 
-///////////////////////////////////////assignment//////////////////////////////////////////////////
+
+//////////////////////////////// assignment /////////////////////////////
+
 assignment
-  = left:variable_name _ "=" _ right:expr
-  {return new AST.Assignment(left, right)}
-///////////////////////////////////////expression//////////////////////////////////////////////////
+  = l:variable_name _ "=" _ r:expr
+    { return new AST.Assignment(l, r) }
+
+
+//////////////////////////////// expression /////////////////////////////
+
 expr
-  = "fn" _ term:function_definition
-  {return term}
-  / _ "if" _ term:if_expression
-  {return term}
-  / term:boolean_expression
-  {return term}
-  / term:arithmetic_expression
-  {return term}
-///////////////////////////////////////////boolean/////////////////////////////////////////////////
+  = "fn" _ fndef:function_definition
+    { return fndef }
+  / "if" _ ifExpr:if_expression
+    { return ifExpr }
+  / boolean_expression
+  / arithmentic_expression
+
+
+//////////////////////////////// boolean expression /////////////////////////////
+
 boolean_expression
-  = _ head:arithmetic_expression _ rest:(relop right:arithmetic_expression)* _
-  {return rest.reduce((result, [op, right])=>
-    new AST.BinOp(result, op, right), head)
-      }
-////////////////////////////////////////////arith//////////////////////////////////////////////////
-arithmetic_expression
-	= _ head:mult_term _ rest:(addop mult_term)* _
-  {return rest.reduce((result, [op, right])=>
-    new AST.BinOp(result, op, right), head)
-  }
+  = l:arithmentic_expression _ op:relop _ r:arithmentic_expression
+    { return new AST.BinOp(l, op, r) }
+
+//////////////////////////////// arithmetic expression /////////////////////////////
+
+arithmentic_expression
+  = head:mult_term rest:(addop mult_term)*
+    { return rollupBinOp(head, rest) }
+
 mult_term
-	= _ head:primary _ rest:(mulop primary)* _
-    {return rest.reduce((result, [op,right])=>
-    new AST.BinOp(result, op, right), head)
-      }
+  = head:primary rest:(mulop primary)*
+    { return rollupBinOp(head, rest) }
+
 primary
-	= integer
-    / function_call                  // I”ve commented these
-    / term:variable_value                 // two out for now
-    / _ "(" _ exp:arithmetic_expression _ ")" _
-    {return exp}
-    
+  = integer
+  / function_call
+  / _ v:variable_value _
+    { return v }
+  / _ "(" _ expr:arithmentic_expression _ ")" _
+    { return expr }
+
+
 integer
-	= _ '+' _ term:digits _
-    {return new AST.Integer(parseInt(term.join(""), 10))}
-  / _ '-' _ term:digits _
-    {return new AST.Integer(parseInt(term.join(""), 10)*-1)}
-  / _ term:digits _
-    {return new AST.Integer(parseInt(term.join(""), 10))}
-digits
-	= term:[0-9]+
+  = _ number: digits _
+    { return new AST.IntegerValue(number) }
+
 addop
-	= '+'
-  / '-'
+  = _ op:[-+] _
+    { return op }
+
 mulop
-	= '*'
-  / '/'
+  = _ op:[*/] _
+    { return op }
+
 relop
-  = '=='
-  / '!='
-  / '>='
-  / '>'
-  / '<='
-  / '<'
-///////////////////////////////////////////func call///////////////////////////////////////////////
+  = '==' / '!=' / '>=' / '>' / '<=' / '<'
+
+
+//////////////////////////////// function call /////////////////////////////
+
 function_call
-  = val:variable_value _ "(" _ ")" _
-  {return new AST.FunctionCall(val, "")}
-///////////////////////////////////////////func def////////////////////////////////////////////////
+  = 'print' _ '(' _ args:call_arguments _ ')'
+    { return new AST.InternalPrint(args) }
+
+  / name:variable_value "(" _ args:call_arguments _ ")"
+    { return new AST.FunctionCall(name, args) }
+
+call_arguments
+  = _ head:primary? rest:( _ "," _ primary)* _ 
+    { return rest.reduce(
+      (test, extra, id) => test.concat(id),
+      [head]
+    )}
+
+//////////////////////////////// function definition /////////////////////////////
+
 function_definition
-  = _ param:param_list _ block:brace_block _
-  {return new AST.FunctionDefinition(param, block)}
+  = params:param_list _ code:brace_block
+    { return new AST.FunctionDefinition(params, code) }
+
 param_list
-  = "(" ")"
+   = "(" _ head:identifier? rest:( _ "," _ identifier)* _ ")" _
+    { return rest.reduce(
+      (result, extra, id) => result.concat(id),
+      [head]
+    )}
+
 brace_block
-  = _ "{" _ term:code _ "}" _
-  {return term}
-/////////////////////////////////////////////other/////////////////////////////////////////////////
-space
-  = [ \t\n\r]
-_
- = space*
+  = "{" _ code:code _ "}" { return code }
+
+
+
+/////////////////////// utility NTs //////////////////////////////
+
+eol "end-of-line" = [\n\r\u2028\u2029]
+ws "whitespace"   = [ \t] / eol
+comment           = "#" (!eol .)*
+_                 = ( ws / comment )*
+__                = ( ws / comment )+
+
+identifier        = id:([a-z][a-zA-Z_0-9]*)
+                    { return text() }
+
+digits            = [-+]? [0-9]+
+                    { return parseInt(text(), 10) }

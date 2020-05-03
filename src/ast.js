@@ -1,106 +1,14 @@
-export class BinOp{
-    constructor(l, op, r){
-        this.left = l
-        this.op = op
-        this.right = r
-    }
-    accept(visitor){
-        return visitor.visitBinOp(this)
-    } 
-}
+import { makeNode } from "./util/make_node.js"
 
-export class Integer{
-    constructor(value){
-        this.value = value
-    }
-
-    accept(visitor){
-        return visitor.visitInteger(this)
-    }
-}
-
-export class Assignment{
-    constructor(l, r){
-        this.variable = l
-        this.expr = r
-    }
-    accept(visitor){
-        return visitor.Assignment(this)
-    }
-}
-
-export class VariableName{
-    constructor(name){
-        this.name = name
-    }
-
-    accept(visitor){
-        return visitor.VariableName(this)
-    }
-}
-
-export class VariableValue{
-    constructor(value){
-        this.value = value
-    }
-
-    accept(visitor){
-        return visitor.VariableValue(this)
-    }
-}
-
-export class IfStatement{
-    constructor(predicate, thenCode, elseCode){
-        this.predicate = predicate
-        this.thenCode = thenCode
-        this.elseCode = elseCode
-    }
-
-    accept(visitor){
-        return visitor.IfStatement(this)
-    }
-}
-
-export class StatementList{
-    constructor(statements){
-        this.statements = statements
-    }
-
-    accept(visitor){
-        return visitor.StatementList(this)
-    }
-}
-
-export class BoundFunction{
-    constructor(formals, code, binding){
-        this.formals = formals
-        this.code = code
-        this.binding = binding
-    }
-
-    accept(visitor){
-        return visitor.BoundFunction(this)
-    }
-}
-
-export class FunctionCall{
-    constructor(name, args){
-        this.name = name
-        this.args = args
-    }
-
-    accept(visitor){
-        return visitor.FunctionCall(this)
-    }
-}
-
-export class FunctionDefinition{
-    constructor(formals, code){
-        this.formals = formals
-        this.code = code
-    }
-
-    accept(visitor){
-        return visitor.FunctionDefinition(this)
-    }
-}
+export const          Assignment=makeNode("Assignment", "variable", "expr")
+export const               BinOp=makeNode("BinOp", "l", "op", "r")
+export const        FunctionCall=makeNode("FunctionCall", "name", "args")
+export const  FunctionDefinition=makeNode("FunctionDefinition", "formals", "code")
+export const         IfStatement=makeNode("IfStatement", "predicate", "thenCode", "elseCode")
+export const        IntegerValue=makeNode("IntegerValue", "value")
+export const       InternalPrint=makeNode("InternalPrint", "args")
+export const       StatementList=makeNode("StatementList", "statements")
+export const               Thunk=makeNode("Thunk", "formals", "code", "binding")
+export const VariableDeclaration=makeNode("VariableDeclaration", "variable", "initialValue")
+export const        VariableName=makeNode("VariableName", "name")
+export const   VariableValue=makeNode("VariableValue", "name")
