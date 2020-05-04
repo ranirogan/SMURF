@@ -1,3 +1,32 @@
+# Week 3
+
+| Part           | Comments    | Points |
+|----------------|-------------|--------|
+| provided tests | All passed  |     65 |
+| extras         | 2 failures  |      6 |
+| Coding         |             |     23 |
+| **TOTAL**      |             |     94 |
+
+### Code comments
+
+File: Interpreter.js
+59:       try{
+60:         var val = args[i].accept(this)
+61:       }
+62:       catch{
+63:         val = this.binding.getVariableValue(args[i])
+64:       }
+
+Why the try?
+
+
+
+### Torture Tests
+
+Just failed two or my more tortuous tests to do with scoping and
+closures.
+
+
 # Week 2
 
 | Part           | Comments    | Points |
