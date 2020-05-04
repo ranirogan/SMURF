@@ -33,7 +33,7 @@ export default class Interpreter {
   }
 
   Assignment(node) {
-    console.log("Assign")
+    // console.log("Assign")
     let variable = node.variable.accept(this)
     let expr     = node.expr.accept(this)
     this.binding.updateVariable(variable, expr)
@@ -41,20 +41,18 @@ export default class Interpreter {
   }
 
   BinOp(node) {
-    console.log("binop")
+    // console.log("binop", node)
     let l = node.l.accept(this)
     let r = node.r.accept(this)
     return operations[node.op](l, r)
   }
 
   FunctionCall(node) {
-    console.log("func call")
+    // console.log("func call", node.name)
     let thunk = node.name.accept(this)
+    // console.log("thunk:", thunk)
     let binding = thunk.binding.push()
     let args = node.args
-    console.log("HELLO WORLD", node)
-    console.log("THUNK", thunk)
-    console.log("lengths", args.length, thunk.formals.length)
     if(args.length != thunk.formals.length)
         throw new Error(`Invalid parameter list for function`)
     for(let i = 0; i < args.length; i = i + 1){
@@ -69,17 +67,18 @@ export default class Interpreter {
     let temp = this.binding
     this.binding = binding
     let ret = thunk.code.accept(this)
+    thunk.binding = this.binding
     this.binding = temp
     return ret
   }
 
   FunctionDefinition(node) {
-    console.log("fun def")
+    // console.log("fun def", node)
     return new AST.Thunk(node.formals, node.code, this.binding)
   }
 
   IfStatement(node) {
-    console.log("if")
+    // console.log("if")
     let predicate = bool(node.predicate.accept(this))
 
     if (predicate == 1)
@@ -89,19 +88,19 @@ export default class Interpreter {
   }
 
   IntegerValue(node) {
-    console.log("int")
+    // console.log("int")
     return node.value
   }
 
   InternalPrint(node) {
-    console.log("internal print")
+    // console.log("internal print")
     let args = node.args.map(a => a.accept(this).toString() )
     this.printFunction(args)
     return args
   }
 
   StatementList(node) {
-    console.log("statement list")
+    // console.log("statement list")
     let result = 0
     node.statements.forEach(statement =>
       result = statement.accept(this)
@@ -110,7 +109,7 @@ export default class Interpreter {
   }
 
   VariableDeclaration(node) {
-    console.log("var dec")
+    // console.log("var dec")
     let variable = node.variable.accept(this)
     let initialValue = 0
     if (node.initialValue) {
@@ -121,12 +120,12 @@ export default class Interpreter {
   }
 
   VariableName(node) {
-    console.log("var name")
+    // console.log("var name")
     return node.name
   }
 
   VariableValue(node) {
-    console.log("var val")
+    // console.log("var val")
     return this.binding.getVariableValue(node.name)
   }
 }

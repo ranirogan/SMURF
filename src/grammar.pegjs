@@ -128,12 +128,14 @@ function_call
     { return new AST.FunctionCall(name, args) }
 
 call_arguments
-  = _ head:primary? rest:( _ "," _ primary)* _ 
-    { return rest.reduce(
-      (test, extra, id) => test.concat(id),
-      [head]
-    )}
-
+= list:(expr (_ "," _ expr:expr{ return expr })* )
+  { return list.flat() }
+  //each element after the first expression is returned into the array
+  //contained by list. .flat() then concatinates the subarrays within the list array
+  //to a specific depth, 1 here since no parameter is given to flat()
+  / ""
+  {return []}
+  
 //////////////////////////////// function definition /////////////////////////////
 
 function_definition
@@ -141,12 +143,12 @@ function_definition
     { return new AST.FunctionDefinition(params, code) }
 
 param_list
-   = "(" _ head:identifier? rest:( _ "," _ identifier)* _ ")" _
-    { return rest.reduce(
-      (result, extra, id) => result.concat(id),
-      [head]
-    )}
-
+   = "(" _  list:(identifier (_ "," _ expr:identifier { return expr })* ) _ ")" 
+  { return list.flat() }
+  //see call_arguments for explination of code
+  / "(" _ ")"
+  {return []}
+  
 brace_block
   = "{" _ code:code _ "}" { return code }
 

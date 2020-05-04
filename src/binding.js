@@ -5,33 +5,37 @@ export default class Binding {
   }
 
   getVariableValue(name) {
-    console.log("Get Var Val binding", name)
+    // console.log("Get Var Val binding", name)
     this.checkVariableExists(name)
-    return this.binding.get(name)
+    let temp = this.binding.get(name)
+    if(temp == null)
+      return this.parent.getVariableValue(name)
+    else
+      return temp
   }
 
 
   setVariable(name, value) {
-    console.log("set var binding", name, value)
-    if (this.binding.has(name))
+    // console.log("set var binding", name, value)
+    // console.log("binding", this.binding)
+    if (this.binding.has(name)){
       throw new Error(`Duplicate declaration for variable`)
-    this.binding.set(name, value)
-    console.log("new bindings", this)
+    }
+    else
+      this.binding.set(name, value)
   }
 
   updateVariable(name, value) { //needs to look at parent as well?
-    console.log("update var", name, value)
-    // this.checkVariableExists(name)
-    // this.setVariable(name, value)
+    // console.log("update var", name, value)
+    this.checkVariableExists(name)
     this.binding.set(name, value)
   }
 
   checkVariableExists(name) { //needs to look at parent as well
-    console.log("check var exists", name)
+    // console.log("check var exists", name)
     if (!this.binding.has(name)){
       let parent = this.pop()
       if(parent == null){
-        console.log("this", this)
         throw new Error(`Reference to unknown variable ${name}`)
       }
       else
@@ -40,12 +44,12 @@ export default class Binding {
   }
 
   push(){
-    console.log("return new binding whose parent is this binding", this)
+    // console.log("return new binding whose parent is this binding", this)
     return new Binding(this)
   }
 
   pop(){
-    console.log("return parent of this binding", this)
+    // console.log("return parent of this binding", this)
     return this.parent
   }
 }
